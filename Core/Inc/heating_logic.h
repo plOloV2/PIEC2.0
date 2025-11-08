@@ -4,6 +4,6 @@
 #include "main.h"
 #include "data_structs.h"
 
-uint8_t heat_controll(struct furnace_stage_data* stage_data, struct temp_PT1000* temp_data);
+void heat_controll(struct furnace_stage_data* stage_data, struct temp_PT1000* temp_data, uint8_t* heat_state);
 
 #endif

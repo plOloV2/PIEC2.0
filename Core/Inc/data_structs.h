@@ -23,8 +23,8 @@ struct furnace_stage_data* furnace_stage_init();
 struct temp_PT1000{
 
     uint8_t     active_sensors;
-    uint16_t    raw_val[4];
-    float       temp_celsius[4]; 
+    uint32_t    raw_val_PT1000[4];
+    float       temp_celsius_PT1000[4]; 
 
 };
 
