@@ -20,10 +20,14 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "fatfs.h"
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "data_structs.h"
+#include "heating_logic.h"
+#include "temp_measure.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -125,7 +129,21 @@ int main(void)
   MX_IWDG_Init();
   MX_RTC_Init();
   MX_SPI2_Init();
+
   /* USER CODE BEGIN 2 */
+
+  // Boath diodes blink 3times at start for debug, to be DELETED in release code
+  HAL_GPIO_WritePin(LED1_GPIO_Port,  LED1_Pin, 1);
+  HAL_GPIO_WritePin(LED2_GPIO_Port,  LED2_Pin, 1);
+
+  for(int i = 0; i < 5; i++){
+    
+    HAL_Delay(250);
+
+    HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+    HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+    
+  }
 
   /* USER CODE END 2 */
 
