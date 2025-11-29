@@ -50,7 +50,7 @@ ADC_HandleTypeDef hadc1;
 
 IWDG_HandleTypeDef hiwdg;
 
-RTC_HandleTypeDef hrtc;
+RNG_HandleTypeDef hrng;
 
 SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio_rx;
@@ -59,6 +59,7 @@ DMA_HandleTypeDef hdma_sdio_tx;
 SPI_HandleTypeDef hspi2;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim10;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -68,7 +69,7 @@ const osThreadAttr_t defaultTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-
+furnace_data* Furnace= NULL;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,8 +80,9 @@ static void MX_ADC1_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_IWDG_Init(void);
-static void MX_RTC_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_TIM10_Init(void);
+static void MX_RNG_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -110,6 +112,8 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+  Furnace = init_furnace_data();
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -127,9 +131,9 @@ int main(void)
   MX_TIM2_Init();
   MX_FATFS_Init();
   MX_IWDG_Init();
-  MX_RTC_Init();
   MX_SPI2_Init();
-
+  MX_TIM10_Init();
+  MX_RNG_Init();
   /* USER CODE BEGIN 2 */
 
   // Boath diodes blink 3times at start for debug, to be DELETED in release code
@@ -348,37 +352,28 @@ static void MX_IWDG_Init(void)
 }
 
 /**
-  * @brief RTC Initialization Function
+  * @brief RNG Initialization Function
   * @param None
   * @retval None
   */
-static void MX_RTC_Init(void)
+static void MX_RNG_Init(void)
 {
 
-  /* USER CODE BEGIN RTC_Init 0 */
+  /* USER CODE BEGIN RNG_Init 0 */
 
-  /* USER CODE END RTC_Init 0 */
+  /* USER CODE END RNG_Init 0 */
 
-  /* USER CODE BEGIN RTC_Init 1 */
+  /* USER CODE BEGIN RNG_Init 1 */
 
-  /* USER CODE END RTC_Init 1 */
-
-  /** Initialize RTC Only
-  */
-  hrtc.Instance = RTC;
-  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-  hrtc.Init.AsynchPrediv = 124;
-  hrtc.Init.SynchPrediv = 7999;
-  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
-  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
-  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
-  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  /* USER CODE END RNG_Init 1 */
+  hrng.Instance = RNG;
+  if (HAL_RNG_Init(&hrng) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN RTC_Init 2 */
+  /* USER CODE BEGIN RNG_Init 2 */
 
-  /* USER CODE END RTC_Init 2 */
+  /* USER CODE END RNG_Init 2 */
 
 }
 
@@ -508,6 +503,37 @@ static void MX_TIM2_Init(void)
 }
 
 /**
+  * @brief TIM10 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM10_Init(void)
+{
+
+  /* USER CODE BEGIN TIM10_Init 0 */
+
+  /* USER CODE END TIM10_Init 0 */
+
+  /* USER CODE BEGIN TIM10_Init 1 */
+
+  /* USER CODE END TIM10_Init 1 */
+  htim10.Instance = TIM10;
+  htim10.Init.Prescaler = 2687;
+  htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim10.Init.Period = 65535;
+  htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM10_Init 2 */
+
+  /* USER CODE END TIM10_Init 2 */
+
+}
+
+/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -582,6 +608,18 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(LCD_SPI_CS_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
+  
+  // sets boath LEDs to high on startup and blinks them 3 times, (kinda usefull for quick and dirty debug)
+  HAL_GPIO_WritePin(GPIOC, LED2_Pin|LED1_Pin, GPIO_PIN_SET);
+  
+  HAL_Delay(250);
+  HAL_GPIO_TogglePin(LED1_GPIO_Port,  LED1_Pin|LED2_Pin);
+
+  HAL_Delay(500);
+  HAL_GPIO_TogglePin(LED1_GPIO_Port,  LED1_Pin|LED2_Pin);
+
+  HAL_Delay(500);
+  HAL_GPIO_TogglePin(LED1_GPIO_Port,  LED1_Pin|LED2_Pin); 
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
@@ -619,6 +657,10 @@ void StartDefaultTask(void *argument)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+
+  if(htim->Instance == TIM10){      //wakes ever 1sec, signals time_handler() to take futher actions
+    osThreadFlagsSet(Furnace->time_id, 0x01);
+  }
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM6)

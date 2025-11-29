@@ -9,7 +9,7 @@
 #define SH_B    -0.01123112836f
 #define SH_C    0.00005477763415f
 
-void measure_temp(struct temp_PT1000* temp_struct, ADC_HandleTypeDef *hadc){
+void measure_temp(temp_PT1000* temp_struct, ADC_HandleTypeDef *hadc){
 
     HAL_ADC_Start(hadc);
 
@@ -35,7 +35,7 @@ float Steinhart_Hart_model_calc(float R){
 
 }
 
-void calculate_temp_celsius(struct temp_PT1000* temp_struct){
+void calculate_temp_celsius(temp_PT1000* temp_struct){
 
     for(uint8_t i = 0; i < 4; i++){
 
