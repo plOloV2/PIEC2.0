@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <sys/_intsup.h>
 
-
+    // struct that holds info about baking stages
 typedef struct furnace_stage_s{
 
     uint16_t    stage_time_min;
@@ -20,10 +20,8 @@ typedef struct furnace_stage_s{
 
 }furnace_stage_data;
 
-furnace_stage_data* init_furnace_stage();       //not writen yet
 
-
-
+    // structs for PT1000 data
 typedef struct{
 
     uint8_t     active_sensors;
@@ -32,10 +30,8 @@ typedef struct{
 
 }temp_PT1000;
 
-temp_PT1000* init_temp_struct(uint8_t active_sensors);      //not writen yet
 
-
-
+    // list of furnace errors
 enum FURNACE_ERRORS{
     NO_ERROR,
     FURNACE_STAGES_NULL,
@@ -49,6 +45,7 @@ enum FURNACE_ERRORS{
     TIME_SEM_NOT_RECIVED,
 };
 
+    // time struct
 typedef struct{
 
     uint8_t     seconds;
@@ -57,6 +54,7 @@ typedef struct{
 
 }baking_time;
 
+    // main data struct
 typedef struct{
 
     furnace_stage_data*     furnace_stages;
@@ -83,7 +81,5 @@ typedef struct{
     osThreadId_t            BUZZER_id;
 
 }furnace_data;
-
-furnace_data* init_furnace_data();      //not writen yet
 
 #endif

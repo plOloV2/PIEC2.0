@@ -18,16 +18,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 #include "fatfs.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "data_structs.h"
-#include "heating_logic.h"
-#include "temp_measure.h"
+#include "init_code.h"
+#include "tasks.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,15 +59,46 @@ SPI_HandleTypeDef hspi2;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim10;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* USER CODE BEGIN PV */
 furnace_data* Furnace= NULL;
+
+const osThreadAttr_t timeTaskAttr = {
+  .name = "time_handler",
+  .stack_size = 128 * 2,    // this size is in words, translates to 1Kb
+  .priority = (osPriority_t) osPriorityHigh,
+};
+
+const osThreadAttr_t tempTaskAttr = {
+  .name = "temp_handler",
+  .stack_size = 128 * 2,    // 1Kb
+  .priority = (osPriority_t) osPriorityHigh,
+};
+
+const osThreadAttr_t heat_fanTaskAttr = {
+  .name = "heat_fan_handler",
+  .stack_size = 128 * 2,    // 1Kb
+  .priority = (osPriority_t) osPriorityHigh,
+};
+
+const osThreadAttr_t BUZZERTaskAttr = {
+  .name = "buzzer_handler",
+  .stack_size = 128,        // 0,5Kb (should be enought)
+  .priority = (osPriority_t) osPriorityLow,
+};
+
+const osThreadAttr_t LCDTaskAttr = {
+  .name = "LCD_handler",
+  .stack_size = 128 * 4,    // 2Kb
+  .priority = (osPriority_t) osPriorityLow,
+};
+
+const osThreadAttr_t SDTaskAttr = {
+  .name = "SD_handler",
+  .stack_size = 128 * 4,    // 2Kb
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,7 +112,6 @@ static void MX_IWDG_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_TIM10_Init(void);
 static void MX_RNG_Init(void);
-void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -111,8 +139,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
-  Furnace = init_furnace_data();
 
   /* USER CODE END Init */
 
@@ -149,6 +175,16 @@ int main(void)
     
   }
 
+  Furnace = init_furnace_data();
+
+  if(!Furnace){
+
+    // data alloc error
+    
+  }
+
+
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -172,7 +208,10 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  Furnace->time_id = osThreadNew(time_handler, Furnace, &timeTaskAttr);
+  Furnace->time_id = osThreadNew(heat_and_fan_handler, Furnace, &heat_fanTaskAttr);
+  Furnace->time_id = osThreadNew(temp_handler, Furnace, &tempTaskAttr);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -627,24 +666,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
