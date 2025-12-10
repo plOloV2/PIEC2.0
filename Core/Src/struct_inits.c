@@ -8,60 +8,32 @@
 
 // temp_PT1000* init_temp_struct(uint8_t active_sensors);      //not writen yet
 
-furnace_data* init_furnace_data(){
+void init_furnace_data(furnace_data* furnace){
 
-    furnace_data* result = NULL;
+    furnace->stage_sem   = osSemaphoreNew(1, 1, NULL);
+    furnace->temp_sem    = osSemaphoreNew(1, 1, NULL);
+    furnace->time_sem    = osSemaphoreNew(1, 1, NULL);
+    furnace->joke_sem    = osSemaphoreNew(1, 1, NULL);
+    furnace->errc_sem    = osSemaphoreNew(1, 1, NULL);
 
-    result = (furnace_data*) pvPortMalloc(sizeof(furnace_data));
-
-    if(!result)
-        return NULL;
-
-    memset(result, 0, sizeof(furnace_data));
-
-    result->furnace_time = (baking_time*) pvPortMalloc(sizeof(baking_time));
-
-    if(!result->furnace_time){
-
-        vPortFree(result);
-        
-        return NULL;
-
-    }
-
-    memset(result->furnace_time, 0, sizeof(baking_time));
-
-    result->stage_sem   = osSemaphoreNew(1, 1, NULL);
-    result->temp_sem    = osSemaphoreNew(1, 1, NULL);
-    result->time_sem    = osSemaphoreNew(1, 1, NULL);
-    result->joke_sem    = osSemaphoreNew(1, 1, NULL);
-    result->errc_sem    = osSemaphoreNew(1, 1, NULL);
-
-    if( !result->stage_sem  || !result->temp_sem || !result->time_sem || 
-        !result->errc_sem   || !result->joke_sem){
+    if( !furnace->stage_sem  || !furnace->temp_sem || !furnace->time_sem || 
+        !furnace->errc_sem   || !furnace->joke_sem){
 
         goto Error_Handler;
 
     }
 
-    return result;
+    return;
 
     // --- CLEANUP SECTION ---
 Error_Handler:
-    if(result) {
-
-        if(result->furnace_time) vPortFree(result->furnace_time);
         
-        if(result->stage_sem) osSemaphoreDelete(result->stage_sem);
-        if(result->temp_sem)  osSemaphoreDelete(result->temp_sem);
-        if(result->joke_sem)  osSemaphoreDelete(result->joke_sem);
-        if(result->errc_sem)  osSemaphoreDelete(result->errc_sem);
-        if(result->time_sem)  osSemaphoreDelete(result->time_sem);
+    if(furnace->stage_sem) osSemaphoreDelete(furnace->stage_sem);
+    if(furnace->temp_sem)  osSemaphoreDelete(furnace->temp_sem);
+    if(furnace->joke_sem)  osSemaphoreDelete(furnace->joke_sem);
+    if(furnace->errc_sem)  osSemaphoreDelete(furnace->errc_sem);
+    if(furnace->time_sem)  osSemaphoreDelete(furnace->time_sem);
 
-        vPortFree(result);
-
-    }
-
-    return NULL;
+    furnace->error_code |= (1U << SEMAPHORES_INIT_FAIL);
 
 }

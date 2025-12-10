@@ -60,7 +60,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim10;
 
 /* USER CODE BEGIN PV */
-furnace_data* Furnace= NULL;
+furnace_data Furnace;
 
 const osThreadAttr_t timeTaskAttr = {
   .name = "time_handler",
@@ -175,15 +175,7 @@ int main(void)
     
   }
 
-  Furnace = init_furnace_data();
-
-  if(!Furnace){
-
-    // data alloc error
-    
-  }
-
-
+  init_furnace_data(&Furnace);
 
   /* USER CODE END 2 */
 
@@ -207,14 +199,13 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-
-  Furnace->time_id = osThreadNew(time_handler, Furnace, &timeTaskAttr);
-  Furnace->time_id = osThreadNew(heat_and_fan_handler, Furnace, &heat_fanTaskAttr);
-  Furnace->time_id = osThreadNew(temp_handler, Furnace, &tempTaskAttr);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+
+  Furnace.time_id = osThreadNew(time_handler, &Furnace, &timeTaskAttr);
+  Furnace.time_id = osThreadNew(heat_and_fan_handler, &Furnace, &heat_fanTaskAttr);
+  Furnace.time_id = osThreadNew(temp_handler, &Furnace, &tempTaskAttr);
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -680,7 +671,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   if(htim->Instance == TIM10){      //wakes ever 1sec, signals time_handler() to take futher actions
-    osThreadFlagsSet(Furnace->time_id, 0x01);
+    osThreadFlagsSet(Furnace.time_id, 0x01);
   }
 
   /* USER CODE END Callback 0 */

@@ -45,6 +45,14 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
+    Core/Src/heat_and_fan_handler.c
+    Core/Src/heating_logic.c
+    Core/Src/jokes.c
+    Core/Src/sett_error.c
+    Core/Src/struct_inits.c
+    Core/Src/temp_handler.c
+    Core/Src/temp_measure_PT1000.c
+    Core/Src/time_handler.c
 )
 
 # Add include paths

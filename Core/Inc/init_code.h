@@ -3,10 +3,10 @@
 
 #include "data_structs.h"
 
-furnace_stage_data* init_furnace_stage();       //not writen yet
+void init_furnace_stage(furnace_stage_data* stages);       //not writen yet
 
-temp_PT1000* init_temp_struct(uint8_t active_sensors);      //not writen yet
+void init_temp_struct(temp_PT1000* temps, uint8_t active_sensors);      //not writen yet
 
-furnace_data* init_furnace_data();      //not writen yet
+void init_furnace_data(furnace_data* furnace);      //not writen yet
 
 #endif

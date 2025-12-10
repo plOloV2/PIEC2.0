@@ -7,7 +7,7 @@
 #include <sys/_intsup.h>
 
     // struct that holds info about baking stages
-typedef struct furnace_stage_s{
+typedef struct{
 
     uint16_t    stage_time_min;
     uint8_t     stage_required_temp;
@@ -15,8 +15,6 @@ typedef struct furnace_stage_s{
     uint8_t     FAN_ON;
 
     char        stage_name[32];
-
-    struct furnace_stage_s* next_stage;
 
 }furnace_stage_data;
 
@@ -34,9 +32,7 @@ typedef struct{
     // list of furnace errors
 enum FURNACE_ERRORS{
     NO_ERROR,
-    FURNACE_STAGES_NULL,
-    FURNACE_TEMP_NULL,
-    FURNACE_TIME_NULL,
+    SEMAPHORES_INIT_FAIL,
     NO_VALID_TEMP_READ,
     SD_CARD_MISSING,
     SD_CARD_ERR,
@@ -57,11 +53,11 @@ typedef struct{
     // main data struct
 typedef struct{
 
-    furnace_stage_data*     furnace_stages;
-    temp_PT1000*            furnace_temp;
-    baking_time*            furnace_time;
+    furnace_stage_data      furnace_stages[10];
+    temp_PT1000             furnace_temp;
+    baking_time             furnace_time;
 
-    uint8_t                 num_stages;
+    uint8_t                 curr_stages;
     uint8_t                 furnace_state;
     uint16_t                error_code;
 

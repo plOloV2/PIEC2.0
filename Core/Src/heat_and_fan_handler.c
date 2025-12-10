@@ -17,22 +17,6 @@ void heat_and_fan_handler(void* argument){
             // suspends itself
         osThreadSuspend(Data->oven_id);     //neds to be tested if it's safe to first suspend
 
-        if(Data->furnace_temp == NULL){
-
-            sett_error(FURNACE_TEMP_NULL, &Data->error_code, Data->errc_sem);
-
-            continue;
-
-        }
-
-        if(Data->furnace_stages == NULL){
-
-            sett_error(FURNACE_STAGES_NULL, &Data->error_code, Data->errc_sem);
-
-            continue;
-
-        }
-
         if(osSemaphoreAcquire(Data->temp_sem, 100) != osOK){
 
             sett_error(TEMP_SEM_NOT_RECIVED, &Data->error_code, Data->errc_sem);
@@ -51,7 +35,7 @@ void heat_and_fan_handler(void* argument){
 
         }
 
-        heat_controll(Data->furnace_stages, Data->furnace_temp, &Data->furnace_state);
+        heat_controll(Data->furnace_stages, &Data->furnace_temp, &Data->furnace_state);
 
         if(Data->furnace_state == 0xff){
 
