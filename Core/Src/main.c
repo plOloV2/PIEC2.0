@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os2.h"
+#include "cmsis_os.h"
 #include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -60,7 +60,14 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim10;
 
 /* USER CODE BEGIN PV */
-furnace_data Furnace;
+
+// this "__attribute__((section(".ccmram")))" part forces data to by placed in faster CCMRAM
+
+// heap alloc for freeRTOS in CCMRAM
+uint8_t ucHeap[ configTOTAL_HEAP_SIZE ] __attribute__((section(".ccmram")));
+
+// main data alloc in CCMRAM
+furnace_data Furnace __attribute__((section(".ccmram")));
 
 const osThreadAttr_t timeTaskAttr = {
   .name = "time_handler",

@@ -4,9 +4,9 @@
 #include "task.h"
 #include <string.h>
 
-// furnace_stage_data* init_furnace_stage();       //not writen yet
+// void init_furnace_stage(furnace_stage_data* stages);       //not writen yet
 
-// temp_PT1000* init_temp_struct(uint8_t active_sensors);      //not writen yet
+// void init_temp_struct(uint8_t active_sensors, temp_PT1000* temps);      //not writen yet
 
 void init_furnace_data(furnace_data* furnace){
 
