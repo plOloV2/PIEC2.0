@@ -15,6 +15,21 @@
   *
   ******************************************************************************
   */
+
+
+
+/*
+ * TODO:
+ * 1. LCD task -> user interface, inplement jokes
+ * 2. SD card task -> reading presets, saving logs (maybe .csv files?)
+ * 3. Buzzer task -> sound on poweron, error, end of stage and end of backing
+ * 4. Buttons input
+ *
+ * Almost all can be ported from steering wheel system
+*/
+
+
+
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
