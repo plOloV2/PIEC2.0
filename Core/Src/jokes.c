@@ -1,11 +1,28 @@
+/* Copyright 2025 PWR Racing Team
+ *
+ * This file contains the most important part of oven:
+ *
+ *              *** JOKES ***
+ */
+
 #include "data_structs.h"
 #include <stdint.h>
 
+/** @brief Constant pointer to an empty string for unused joke lines. */
 static char* EMPTY = "";
 
-void funny1(char** jokes, uint32_t seed){
+/**
+ * Generates a randomized joke by combining 
+ * a name and an action from predefined internal lists.
+ *
+ * @brief Generate a dynamic person/action joke.
+ * @param jokes Pointer to an array of four strings to be populated.
+ * @param seed  Randomization seed used to select indices.
+ * @author Aleksander Dziągwa
+ */
+void funny1(char** jokes, uint32_t seed) {
 
-    static const char* names[] = {
+static const char* names[] = {
         "Michal Dowgiallo",
         "Zuber",
         "Sobczak",
@@ -59,15 +76,26 @@ void funny1(char** jokes, uint32_t seed){
         "jest szalony"
     };
 
+    // Select name and action based on the seed modulo the array size
     jokes[0] = (char*)names[seed % 22];
     jokes[1] = (char*)actions[seed % 26];
     
+    // Clear remaining lines
     jokes[2] = EMPTY;
     jokes[3] = EMPTY;
 }
 
-void funny2(char** jokes, uint32_t seed){
+/**
+ * Selects a predefined multi-line joke from a hardcoded list.
+ *
+ * @brief Generate a static multi-line joke.
+ * @param jokes Pointer to an array of four strings to be populated.
+ * @param seed  Randomization seed used to select the joke index.
+ * @author Aleksander Dziągwa
+ */
+void funny2(char** jokes, uint32_t seed) {
 
+    /** @brief Internal structure to map jokes to the 4-line LCD layout. */
     typedef struct {
         const char* line0;
         const char* line1;
@@ -87,6 +115,7 @@ void funny2(char** jokes, uint32_t seed){
         {"Czego nigdy nie robi",            "prawdziwy elektryk?",          "Nie lapie dziewczyny za",      "dwa cycki na raz"}
     };
 
+    // Select a joke structure from the table
     const JokeLines* selected = &entries[seed % 9];
 
     jokes[0] = (char*)selected->line0;
@@ -95,16 +124,22 @@ void funny2(char** jokes, uint32_t seed){
     jokes[3] = (char*)selected->line3;
 }
 
-void GetJoke(char** jokes, uint32_t seed){
+/**
+ * Main entry point for the joke system. Determines which type of 
+ * joke to display based on a weighted probability determined by the seed.
+ *
+ * @brief Retrieve a randomized joke for the system.
+ * @param jokes Array of 4 character pointers (strings) of size 32 to hold the output.
+ * @param seed  The randomization seed.
+ * @author Aleksander Dziągwa
+ */
+void GetJoke(char** jokes, uint32_t seed) {
 
-    if(seed % 2137 < 69){
-
+    // Just some funny numbers
+    if (seed % 2137 < 69) {
         funny2(jokes, seed);
-
-    } else{
-
+    } else {
         funny1(jokes, seed);
-
     }
-    
+
 }

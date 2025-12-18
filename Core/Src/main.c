@@ -62,6 +62,7 @@ TIM_HandleTypeDef htim10;
 /* USER CODE BEGIN PV */
 
 // this "__attribute__((section(".ccmram")))" part forces data to by placed in faster CCMRAM
+// This ram is fater but cannot be used for peripetials
 
 // heap alloc for freeRTOS in CCMRAM
 uint8_t ucHeap[ configTOTAL_HEAP_SIZE ] __attribute__((section(".ccmram")));

@@ -1,81 +1,122 @@
+/* Copyright 2025 PWR Racing Team
+ *
+ * This file contains the data structures for the furnace 
+ * control system, including temperature monitoring, 
+ * baking stages, and FreeRTOS synchronization primitives.
+ */
+
 #ifndef DATA_STRUCTS_H
 #define DATA_STRUCTS_H
 
 #include "cmsis_os.h"
 #include "cmsis_os2.h"
 #include <stdint.h>
-#include <sys/_intsup.h>
 
-    // struct that holds info about baking stages
-typedef struct{
+/**
+ * @brief Structure that holds information about individual baking stages.
+ */
+typedef struct {
+    /** @brief Stage duration in minutes. */
+    uint16_t stage_time_min;
 
-    uint16_t    stage_time_min;
-    uint8_t     stage_required_temp;
-    uint8_t     temp_grow;
-    uint8_t     FAN_ON;
+    /** @brief Target temperature in Celsius. 0xFF indicates an error or unset state. */
+    uint8_t stage_required_temp;
 
-    char        stage_name[32];
+    /** * @brief Temperature growth rate in degrees per minute.
+     * Values are typically between 0.0 and 10.0. 
+     * Divide this integer value by 10 to obtain the actual decimal value.
+     */
+    uint8_t temp_grow;
 
-}furnace_stage_data;
+    /** @brief Boolean flag; non-zero if the fan is active during this stage. */
+    uint8_t FAN_ON;
 
+    /** @brief Name of the stage for LCD display purposes (max 32 chars). */
+    char stage_name[32];
+} furnace_stage_data;
 
-    // structs for PT1000 data
-typedef struct{
+/**
+ * @brief Structure for PT1000 sensor data and processing.
+ */
+typedef struct {
+    /** @brief Bitmask of active sensors for error rejection algorithms. */
+    uint8_t active_sensors;
 
-    uint8_t     active_sensors;
-    uint32_t    raw_val_PT1000[4];
-    float       temp_celsius_PT1000[4]; 
+    /** @brief Raw ADC values measured from four PT1000 sensors. */
+    uint32_t raw_val_PT1000[4];
 
-}temp_PT1000;
+    /** @brief Converted temperature values in Celsius. */
+    float temp_celsius_PT1000[4];
+} temp_PT1000;
 
-
-    // list of furnace errors
-enum FURNACE_ERRORS{
-    NO_ERROR,
-    SEMAPHORES_INIT_FAIL,
-    NO_VALID_TEMP_READ,
-    SD_CARD_MISSING,
-    SD_CARD_ERR,
-    STAGE_SEM_NOT_RECIVED,
-    TEMP_SEM_NOT_RECIVED,
-    TIME_SEM_NOT_RECIVED,
+/**
+ * @brief List of furnace system error codes.
+ */
+enum FURNACE_ERRORS {
+    SEMAPHORES_INIT_FAIL,   /**< Failed to initialize FreeRTOS semaphores. */
+    NO_VALID_TEMP_READ,     /**< Failed to obtain any valid temperature reading. */
+    SD_CARD_MISSING,        /**< Failed to detect the SD card. */
+    SD_CARD_ERR,            /**< Failed to read from or write to the SD card. */
+    STAGE_SEM_NOT_RECEIVED, /**< Failed to obtain semaphore for furnace_stage_data. */
+    TEMP_SEM_NOT_RECEIVED,  /**< Failed to obtain semaphore for temp_PT1000. */
+    TIME_SEM_NOT_RECEIVED,  /**< Failed to obtain semaphore for baking_time. */
 };
 
-    // time struct
-typedef struct{
+/**
+ * @brief Structure for tracking baking duration and stage progress.
+ */
+typedef struct {
+    /** @brief Current second count. */
+    uint8_t seconds;
 
-    uint8_t     seconds;
-    uint16_t    minutes_sice_start;
-    uint16_t    minutes_sice_stage;
+    /** @brief Total minutes elapsed since the baking process started. */
+    uint16_t minutes_since_start;
 
-}baking_time;
+    /** @brief Minutes elapsed since the current stage began. */
+    uint16_t minutes_since_stage;
+} baking_time;
 
-    // main data struct
-typedef struct{
+/**
+ * @brief Main system data structure.
+ * Contains all sub-structures, thread IDs, and synchronization primitives.
+ */
+typedef struct {
+    /* --- Sub-structures --- */
+    furnace_stage_data furnace_stages[10];
+    temp_PT1000 furnace_temp;
+    baking_time furnace_time;
 
-    furnace_stage_data      furnace_stages[10];
-    temp_PT1000             furnace_temp;
-    baking_time             furnace_time;
+    /** @brief Index of the current active stage. */
+    uint8_t curr_stages;
 
-    uint8_t                 curr_stages;
-    uint8_t                 furnace_state;
-    uint16_t                error_code;
+    /** 
+     * @brief Current operational state of the furnace.
+     * 0xff -> error ocured while calculating state,
+     * heating elements and fan are off.
+     */
+    uint8_t furnace_state;
 
-    char                    jokes_on_you[4][32];
+    /** @brief Current system error code (0 indicates no error). */
+    uint16_t error_code;
 
-    osSemaphoreId_t         stage_sem;
-    osSemaphoreId_t         temp_sem;
-    osSemaphoreId_t         time_sem;
-    osSemaphoreId_t         joke_sem;
-    osSemaphoreId_t         errc_sem;
+    /** @brief Buffer for jokes. */
+    char jokes_on_you[4][32];
 
-    osThreadId_t            time_id;
-    osThreadId_t            temp_id;
-    osThreadId_t            oven_id;
-    osThreadId_t            SD_id;
-    osThreadId_t            LCD_id;
-    osThreadId_t            BUZZER_id;
+    /* --- FreeRTOS Semaphores --- */
+    osSemaphoreId_t stage_sem; /**< Semaphore for furnace_stage_data access. */
+    osSemaphoreId_t temp_sem;  /**< Semaphore for temp_PT1000 access. */
+    osSemaphoreId_t time_sem;  /**< Semaphore for baking_time access. */
+    osSemaphoreId_t joke_sem;  /**< Semaphore for joke buffer access. */
+    osSemaphoreId_t errc_sem;  /**< Semaphore for error_code access. */
 
-}furnace_data;
+    /* --- FreeRTOS Thread IDs --- */
+    osThreadId_t time_id;
+    osThreadId_t temp_id;
+    osThreadId_t oven_id;
+    osThreadId_t SD_id;
+    osThreadId_t LCD_id;
+    osThreadId_t BUZZER_id;
 
-#endif
+} furnace_data;
+
+#endif // DATA_STRUCTS_H_
