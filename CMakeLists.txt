@@ -53,6 +53,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/temp_handler.c
     Core/Src/temp_measure_PT1000.c
     Core/Src/time_handler.c
+    Core/Src/buzzer_handler.c
 )
 
 # Add include paths

@@ -38,4 +38,14 @@ void temp_handler(void* argument);
  */
 void heat_and_fan_handler(void* argument);
 
+/**
+ * Task responsible for playing sounds with simple
+ * buzzer located on PCB.
+ * 
+ * @brief Buzzer management task.
+ * @param argument Pointer to the melody structure.
+ * @author Aleksander Dziągwa
+ */
+void buzzer_handler(void* argument);
+
 #endif
