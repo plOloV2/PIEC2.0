@@ -20,7 +20,7 @@
 /**
  * External function to report system errors in a thread-safe manner.
  */
-void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t error_sem);
+void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t error_sem, osThreadId_t buzz_id);
 
 /**
  * Primary timing task. It waits for a 1Hz hardware signal (via flags) 
@@ -41,7 +41,7 @@ void time_handler(void* argument) {
 
         // Synchronize access to the shared time structure
         if (osSemaphoreAcquire(Data->time_sem, 100) != osOK) {
-            sett_error(TIME_SEM_NOT_RECEIVED, &Data->error_code, Data->errc_sem);
+            sett_error(TIME_SEM_NOT_RECEIVED, &Data->error_code, Data->errc_sem, Data->BUZZER_id);
             continue;
         }
 

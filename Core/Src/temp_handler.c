@@ -15,7 +15,7 @@
 /**
  * External function to report system errors in a thread-safe manner.
  */
-void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t error_sem);
+void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t error_sem, osThreadId_t buzz_id);
 
 /**
  * Task responsible for managing the temperature measurement cycle. 
@@ -34,7 +34,7 @@ void temp_handler(void* argument) {
 
         // Attempt to acquire temperature data semaphore before writing
         if (osSemaphoreAcquire(Data->temp_sem, 100) != osOK) {
-            sett_error(TEMP_SEM_NOT_RECEIVED, &Data->error_code, Data->errc_sem);
+            sett_error(TEMP_SEM_NOT_RECEIVED, &Data->error_code, Data->errc_sem, Data->BUZZER_id);
             continue;
         }
 

@@ -23,7 +23,7 @@
  * @param error_sem   The semaphore used for thread synchronization.
  * @author Aleksander Dziągwa
  */
-void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t error_sem) {
+void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t error_sem, osThreadId_t buzz_id){
 
     // Attempt to acquire the semaphore with a 100ms timeout
     osStatus_t errc_status = osSemaphoreAcquire(error_sem, 100);
@@ -35,6 +35,8 @@ void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t erro
 
         // Release the semaphore back to the system
         osSemaphoreRelease(error_sem);
+
+        osThreadFlagsSet(buzz_id, 0x01U);
 
     }
 

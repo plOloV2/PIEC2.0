@@ -19,7 +19,7 @@
 /**
  * External function to report system errors in a thread-safe manner.
  */
-void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t error_sem);
+void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t error_sem, osThreadId_t buzz_id);
 
 /**
  * Task responsible for managing the furnace hardware state. 
@@ -42,14 +42,14 @@ void heat_and_fan_handler(void* argument){
 
         // Attempt to acquire temperature data semaphore
         if (osSemaphoreAcquire(Data->temp_sem, 100) != osOK) {
-            sett_error(TEMP_SEM_NOT_RECEIVED, &Data->error_code, Data->errc_sem);
+            sett_error(TEMP_SEM_NOT_RECEIVED, &Data->error_code, Data->errc_sem, Data->BUZZER_id);
             continue;
         }
 
         // Attempt to acquire baking stage data semaphore
         if (osSemaphoreAcquire(Data->stage_sem, 100) != osOK) {
             osSemaphoreRelease(Data->temp_sem);
-            sett_error(STAGE_SEM_NOT_RECEIVED, &Data->error_code, Data->errc_sem);
+            sett_error(STAGE_SEM_NOT_RECEIVED, &Data->error_code, Data->errc_sem, Data->BUZZER_id);
             continue;
         }
 
@@ -63,7 +63,7 @@ void heat_and_fan_handler(void* argument){
             HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_RESET);
 
             // Sett error for no valid temp read
-            sett_error(NO_VALID_TEMP_READ, &Data->error_code, Data->errc_sem);
+            sett_error(NO_VALID_TEMP_READ, &Data->error_code, Data->errc_sem, Data->BUZZER_id);
         
             osSemaphoreRelease(Data->stage_sem);
             osSemaphoreRelease(Data->temp_sem);
