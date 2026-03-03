@@ -45,6 +45,7 @@ static const Melody error = {
     }
 };
 
+
 void play_err_code(furnace_data* Data){
 
 }
@@ -60,32 +61,30 @@ void buzzer_handler(void* argument){
 
     while(1){
 
-        uint32_t flag = osThreadFlagsWait(0x01U, osFlagsWaitAny, osWaitForever);
+        uint32_t flag = osThreadFlagsWait(STARTUP_FLAG | STAGE_END_FLAG | BAKING_END_FLAG | ERROR_FLAG, osFlagsWaitAny, osWaitForever);
 
-        switch(flag){
+        if(!(flag & 0x80000000)){
 
-            case 0x01U:
+            if(flag & ERROR_FLAG){
 
                 play_err_code(Data);
-                break;
 
-            case 0x02U:
+            }else if(flag & STARTUP_FLAG){
 
                 play_melody(R2D);
-                break;
 
-            case 0x03U:
+            }else if(flag & STAGE_END_FLAG){
 
                 play_melody(stage_end);
-                break;
 
-            case 0x04U:
+            }else if(flag & BAKING_END_FLAG){
 
                 play_melody(baking_end);
-                break;
-        
+                
+            }
+
         }
-        
+
     }
 
 }

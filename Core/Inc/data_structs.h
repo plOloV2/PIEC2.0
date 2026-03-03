@@ -12,6 +12,11 @@
 #include "cmsis_os2.h"
 #include <stdint.h>
 
+#define STARTUP_FLAG    0b0001U
+#define STAGE_END_FLAG  0b0010U
+#define BAKING_END_FLAG 0b0100U
+#define ERROR_FLAG      0b1000U
+
 /**
  * @brief Structure that holds information about individual baking stages.
  */

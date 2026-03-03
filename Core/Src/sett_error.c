@@ -10,6 +10,7 @@
  */
 
 #include "cmsis_os2.h"
+#include "data_structs.h"
 #include <stdint.h>
 
 /**
@@ -36,7 +37,7 @@ void sett_error(uint8_t error_value, uint16_t* error_codes, osSemaphoreId_t erro
         // Release the semaphore back to the system
         osSemaphoreRelease(error_sem);
 
-        osThreadFlagsSet(buzz_id, 0x01U);
+        osThreadFlagsSet(buzz_id, ERROR_FLAG);
 
     }
 
