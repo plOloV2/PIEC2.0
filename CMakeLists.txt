@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 4.0)
 
 #
 # This file is generated only once,
@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.22)
 #
 
 # Setup compiler settings
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
@@ -30,6 +30,11 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Enable CMake support for ASM and C languages
 enable_language(C ASM)
+
+# Compiller info
+message(STATUS "C Compiler in use: ${CMAKE_C_COMPILER_ID}")
+message(STATUS "C Compiler version: ${CMAKE_C_COMPILER_VERSION}")
+message(STATUS "C Compiler path: ${CMAKE_C_COMPILER}")
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
