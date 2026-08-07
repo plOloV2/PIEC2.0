@@ -56,9 +56,6 @@
 #define CMSIS_device_header "stm32f4xx.h"
 #endif /* CMSIS_device_header */
 
-// use heap on CCMRAM
-#define configAPPLICATION_ALLOCATED_HEAP         1
-
 #define configENABLE_FPU                         1
 #define configENABLE_MPU                         0
 
